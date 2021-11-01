@@ -6,16 +6,17 @@ import requests
 from requests.exceptions import ConnectionError
 
 def warning_formatter(msg, category, filename, lineno, line=None):
-"""Function to format a warning the standard way."""
+    """Function to format a warning the standard way."""
     try:
         unicodetype = unicode
     except NameError:
         unicodetype = ()
     try:
-        message = str(message)
+        msg = str(msg)
     except UnicodeEncodeError:
         pass
-    return message
+    s = f"{category.__name__}: {msg}\n"
+    return s
 
 warnings.formatwarning = warning_formatter
 
