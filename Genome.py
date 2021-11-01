@@ -2,6 +2,7 @@ from os import path
 from urllib.parse import urlparse
 
 from ufuncs import empty, find_file
+from TrackParser import TrackParser
 
 class Genome:
     '''
@@ -31,6 +32,7 @@ class Genome:
         '''
         _clever = kwargs.get('clever', False)
         _fasta = find_file(fasta)
+        self._trackParser = TrackParser()
         if _fasta is None:
             # TODO raise exception, can't proceed
             pass
@@ -51,19 +53,17 @@ class Genome:
         info['wholeGenomeView'] = kwargs.get('wholeGenomeView', True)
         info['chromosomeOrder'] = self.get_chromosome_order(kwargs.get('chromsomeOrder'))
 
-        info['tracks'] = self.build_tracks(bed)
-
-
+        info['tracks'] = self.build_track(bed)
 
         self.info = {key: val for key, val in info.items() if val is not None}
 
-    def get_name(self, fasta, name):
+    def get_name(self, url, name):
         '''
         Returns the best name for this genome ref
 
         Parameters
         ---------
-        fasta: str - fasta file URL
+        url: str - file URL
         name: str - user supplied name, has priority
 
         Returns
@@ -73,8 +73,8 @@ class Genome:
         '''
         if not empty(name):
             return name
-        url = urlparse(fasta)
-        return path.base(url.path).split('.')[0]
+        purl = urlparse(url)
+        return path.base(purl.path).split('.')[0]
 
     def get_fasta_index(self, fasta, fai, clever=False):
         '''
@@ -130,6 +130,26 @@ class Genome:
             # TODO add Warning message here, the user is expecting a read
             return None
 
+    def build_track(self, bed):
+        '''
+        Transform a bed file to a list of tracks
 
+        Parameters
+        ---------
+        bed: str - the local path to the bed file
 
+        Return
+        -----
+        dict
+        track entry accordin to
+        <https://github.com/igvteam/igv/wiki/JSON-Genome-Format#file-paths>
+        returns None if bed file not found
+        '''
+        if find_file(bed) is None:
+            return None
 
+        return {
+            "name": self.get_name(bed),
+            "format": "bed",
+            "url": bed
+        }
