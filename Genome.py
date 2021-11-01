@@ -1,5 +1,6 @@
 from os import path
 from urllib.parse import urlparse
+import warnings
 
 from ufuncs import empty, find_file
 
@@ -61,7 +62,7 @@ class Genome:
         if valid:
             pass
         else:
-            # raise error
+            # TODO raise error
             pass
         self.info = info
 
@@ -81,6 +82,7 @@ class Genome:
         '''
         if not empty(name):
             return name
+
         purl = urlparse(url)
         return path.basename(purl.path).split('.')[0]
 
@@ -128,14 +130,14 @@ class Genome:
         if empty(chromosome_order):
             return None
 
-        # TODO add excpetions
         try:
             with open(chromosome_order) as f:
                 chrs = f.read()
                 chr_ord = chrs.splitlines()
                 return chr_ord
         except FileNotFoundError as e:
-            # TODO add Warning message here, the user is expecting a read
+            warnings.warn(f"chromosomeOrder file {chromosome_order} was\
+                    supplied but wasn't found")
             return None
 
     def build_track(self, bed):
