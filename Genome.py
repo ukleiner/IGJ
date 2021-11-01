@@ -2,7 +2,6 @@ from os import path
 from urllib.parse import urlparse
 
 from ufuncs import empty, find_file
-from TrackParser import TrackParser
 
 class Genome:
     '''
@@ -12,7 +11,7 @@ class Genome:
     This is the main class to create a JSON genome file.
     Can read .genome files and translate them to the json format
     '''
-    def __init__(self, fasta, bed, **kwargs):_id=None, name=None, cytoband=None):
+    def __init__(self, fasta, bed, **kwargs):
         '''
             Parameters
                 fasta: str - URL to fasta file
@@ -30,16 +29,17 @@ class Genome:
             Returns
             -------
         '''
+        _id = kwargs.get('id')
+        _name = kwargs.get('name')
         _clever = kwargs.get('clever', False)
         _fasta = find_file(fasta)
-        self._trackParser = TrackParser()
         if _fasta is None:
             # TODO raise exception, can't proceed
             pass
 
         info = {
             'id': _id,
-            'name': self.get_name(fasta, name),
+            'name': self.get_name(fasta, _name),
             'fastaURL': _fasta,
             'indexURL': self.get_fasta_index(fasta, kwargs.get('indexURL'),
                 _clever),
@@ -48,14 +48,22 @@ class Genome:
         url_keywords = ['cytobandURL', 'aliasURL']
         for keyword in url_keywords:
             info[keyword] = find_file(kwargs.get(keyword))
-        }
 
         info['wholeGenomeView'] = kwargs.get('wholeGenomeView', True)
         info['chromosomeOrder'] = self.get_chromosome_order(kwargs.get('chromsomeOrder'))
 
-        info['tracks'] = self.build_track(bed)
+        track = self.build_track(bed)
+        if track is not None:
+            info['tracks'] = [track]
 
-        self.info = {key: val for key, val in info.items() if val is not None}
+        non_none  = {key: val for key, val in info.items() if val is not None}
+        valid = self.check_validity(non_none)
+        if valid:
+            pass
+        else:
+            # raise error
+            pass
+        self.info = info
 
     def get_name(self, url, name):
         '''
@@ -74,7 +82,7 @@ class Genome:
         if not empty(name):
             return name
         purl = urlparse(url)
-        return path.base(purl.path).split('.')[0]
+        return path.basename(purl.path).split('.')[0]
 
     def get_fasta_index(self, fasta, fai, clever=False):
         '''
@@ -100,10 +108,10 @@ class Genome:
             retry = False
         file = find_file(fastai)
         if retry and file is None:
-            file = self._get_fasta_index(fasta=fasta, fai=None, clever=False)
+            file = self.get_fasta_index(fasta=fasta, fai=None, clever=False)
         return file
 
-    def get_chromosme_order(self, chromosome_order):
+    def get_chromosome_order(self, chromosome_order):
         '''
         Get the chromosme order array from a file
 
@@ -153,3 +161,19 @@ class Genome:
             "format": "bed",
             "url": bed
         }
+
+        def check_validity(self, info):
+            '''
+            Check all obligatory properties are in the info dict
+
+            Parameters
+            ----------
+            info: dict - non-None values representing genome
+
+            Returns
+            -------
+            bool
+            If valid or not
+            '''
+            musts = []
+            return all(m in info for m in musts)

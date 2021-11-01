@@ -1,7 +1,13 @@
+from os import path
+from urllib.parse import urlparse
+
+import requests
+from requests.exceptions import ConnectionError
+
 def empty(string):
     return string is None or len(string.strip()) == 0
 
-def find_file(self, url):
+def find_file(url):
     '''
     Checks if the file can be found
 
@@ -25,8 +31,12 @@ def find_file(self, url):
     elif scheme in ['https', 'http']:
         # Only headers
         # allow_redirects = False by default
-        req = requests.head(url)
-        if req.status_code == 200:
-            return url
+        try:
+            req = requests.head(url)
+            if req.status_code == 200:
+                return url
+        except ConnectionError as e:
+            # TODO issue warning
+            return None
 
     return None
