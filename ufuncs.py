@@ -27,6 +27,7 @@ def find_file(url):
     parsed = urlparse(url)
     scheme = parsed.scheme
     if scheme == '':
+        url = path.expanduser(url)
         if path.isfile(url):
             return url
     elif scheme in ['https', 'http']:
