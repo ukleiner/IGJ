@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 import warnings
 
 from ufuncs import empty, find_file
-from exceptions import MissingFasta
+from exceptions import MissingFasta, MissingName
 
 class Genome:
     '''
@@ -58,15 +58,11 @@ class Genome:
             info['tracks'] = [track]
 
         non_none  = {key: val for key, val in info.items() if val is not None}
-        valid = self.check_validity(non_none)
-        if valid:
-            pass
-        else:
-            # TODO raise error
-            pass
-        self.info = info
+        # raises a variety of errors
+        self.check_validity(non_none)
+        self.info = non_none
 
-    def get_name(self, url, name):
+    def get_name(self, url, name=None):
         '''
         Returns the best name for this genome ref
 
@@ -155,7 +151,8 @@ class Genome:
         <https://github.com/igvteam/igv/wiki/JSON-Genome-Format#file-paths>
         returns None if bed file not found
         '''
-        if find_file(bed) is None:
+        bed = find_file(bed) # find_file expands the user dir
+        if bed is None:
             return None
 
         return {
@@ -177,5 +174,7 @@ class Genome:
         bool
         If valid or not
         '''
-        musts = []
-        return all(m in info for m in musts)
+        if 'name' not in info:
+            raise MissingName("Name missing in the final check")
+        if 'fastaURL' not in info:
+            raise MissingFasta("Fasta URL missing in the final check")
