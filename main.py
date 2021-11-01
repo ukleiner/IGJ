@@ -44,6 +44,8 @@ def parser_creator():
                     it the program will print the json", dest="output", metavar="PATH")
     parser.add_argument('--version', '-v', action='version', version='%(prog) v1.0.0')
 
+    return parser
+
 def main():
     '''
         Main entry point of the program
