@@ -1,3 +1,4 @@
+import warnings
 from os import path
 from urllib.parse import urlparse
 
@@ -35,8 +36,10 @@ def find_file(url):
             req = requests.head(url)
             if req.status_code == 200:
                 return url
+            else:
+                warnings.warn(f"File not found, status code {req.status_code}")
         except ConnectionError as e:
-            # TODO issue warning
+            warnings.warn(f"Couldn't connect to  {url}")
             return None
 
     return None
