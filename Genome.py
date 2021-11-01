@@ -2,8 +2,10 @@ from os import path
 from urllib.parse import urlparse
 import warnings
 
-from ufuncs import empty, find_file
+from ufuncs import empty, find_file, warning_formatter
 from exceptions import MissingFasta, MissingName
+
+warnings.formatwarning = warning_formatter
 
 class Genome:
     '''
@@ -151,8 +153,11 @@ class Genome:
         <https://github.com/igvteam/igv/wiki/JSON-Genome-Format#file-paths>
         returns None if bed file not found
         '''
+        if empty(bed):
+            return None
         bed = find_file(bed) # find_file expands the user dir
         if bed is None:
+            warnings.warn("BED file supplied but couldn't be found", source=0)
             return None
 
         return {

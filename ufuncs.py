@@ -5,6 +5,20 @@ from urllib.parse import urlparse
 import requests
 from requests.exceptions import ConnectionError
 
+def warning_formatter(msg, category, filename, lineno, line=None):
+"""Function to format a warning the standard way."""
+    try:
+        unicodetype = unicode
+    except NameError:
+        unicodetype = ()
+    try:
+        message = str(message)
+    except UnicodeEncodeError:
+        pass
+    return message
+
+warnings.formatwarning = warning_formatter
+
 def empty(string):
     return string is None or len(string.strip()) == 0
 
