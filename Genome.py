@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import warnings
 
 from ufuncs import empty, find_file
+from exceptions import MissingFasta
 
 class Genome:
     '''
@@ -35,8 +36,7 @@ class Genome:
         _clever = kwargs.get('clever', False)
         _fasta = find_file(fasta)
         if _fasta is None:
-            # TODO raise exception, can't proceed
-            pass
+            raise MissingFasta(f"fastafile {fasta} couldn't be found")
 
         info = {
             'id': _id,
