@@ -162,18 +162,18 @@ class Genome:
             "url": bed
         }
 
-        def check_validity(self, info):
-            '''
-            Check all obligatory properties are in the info dict
+    def check_validity(self, info):
+        '''
+        Check all obligatory properties are in the info dict
 
-            Parameters
-            ----------
-            info: dict - non-None values representing genome
+        Parameters
+        ----------
+        info: dict - non-None values representing genome
 
-            Returns
-            -------
-            bool
-            If valid or not
-            '''
-            musts = []
-            return all(m in info for m in musts)
+        Returns
+        -------
+        bool
+        If valid or not
+        '''
+        musts = []
+        return all(m in info for m in musts)
