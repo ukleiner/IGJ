@@ -1,7 +1,7 @@
 from os import path
 from urllib.parse import urlparse
 
-from ufuncs import empty
+from ufuncs import empty, find_file
 
 class Genome:
     '''
@@ -30,7 +30,7 @@ class Genome:
             -------
         '''
         _clever = kwargs.get('clever', False)
-        _fasta = self._find_file(fasta)
+        _fasta = find_file(fasta)
         if _fasta is None:
             # TODO raise exception, can't proceed
             pass
@@ -45,11 +45,14 @@ class Genome:
 
         url_keywords = ['cytobandURL', 'aliasURL']
         for keyword in url_keywords:
-            info[keyword] = self._find_file(kwargs.get(keyword))
+            info[keyword] = find_file(kwargs.get(keyword))
         }
 
         info['wholeGenomeView'] = kwargs.get('wholeGenomeView', True)
         info['chromosomeOrder'] = self.get_chromosome_order(kwargs.get('chromsomeOrder'))
+
+        info['tracks'] = self.build_tracks(bed)
+
 
 
         self.info = {key: val for key, val in info.items() if val is not None}
@@ -95,7 +98,7 @@ class Genome:
         else:
             fastai = f"{fasta}.fai"
             retry = False
-        file = self._find_file(fastai)
+        file = find_file(fastai)
         if retry and file is None:
             file = self._get_fasta_index(fasta=fasta, fai=None, clever=False)
         return file
@@ -128,34 +131,5 @@ class Genome:
             return None
 
 
-    def _find_file(self, url):
-        '''
-        Checks if the file can be found
-
-        Parameters
-        ---------
-        url - URL to the file
-
-        Returns
-        ------
-        str
-        The file if can be found, None otherwise
-        '''
-        if empty(url):
-            return None
-
-        parsed = urlparse(url)
-        scheme = parsed.scheme
-        if scheme == '':
-            if path.isfile(url):
-                return url
-        elif scheme in ['https', 'http']:
-            # Only headers
-            # allow_redirects = False by default
-            req = requests.head(url)
-            if req.status_code == 200:
-                return url
-
-        return None
 
 
